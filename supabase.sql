@@ -1,4 +1,4 @@
--- CroqueClassification schema + RPC for GitHub Pages + Supabase
+-- Corquet League schema + RPC for GitHub Pages + Supabase
 -- Run this file in Supabase SQL Editor.
 
 create extension if not exists pgcrypto;
@@ -16,8 +16,12 @@ create table if not exists public.tournaments (
   public_id text not null unique,
   admin_token text not null unique,
   title text not null,
+  subtitle text null,
   created_at timestamptz not null default now()
 );
+
+alter table public.tournaments
+add column if not exists subtitle text null;
 
 create table if not exists public.players (
   id uuid primary key default gen_random_uuid(),
@@ -239,6 +243,7 @@ begin
   return jsonb_build_object(
     'publicId', t.public_id,
     'title', t.title,
+    'subtitle', t.subtitle,
     'players', players_arr,
     'scoringRules', rules_obj,
     'matches', matches_arr,
@@ -250,7 +255,7 @@ begin
 end;
 $$;
 
-create or replace function public.create_tournament(p_title text, p_players jsonb)
+create or replace function public.create_tournament(p_title text, p_players jsonb, p_subtitle text default null)
 returns jsonb
 language plpgsql
 security definer
@@ -260,12 +265,14 @@ declare
   t_id uuid;
   valid_count int;
   clean_title text;
+  clean_subtitle text;
 begin
   if jsonb_typeof(p_players) <> 'array' then
     raise exception 'Formato de jugadores inválido';
   end if;
 
   select coalesce(nullif(trim(p_title), ''), 'Torneo sin título') into clean_title;
+  select nullif(trim(coalesce(p_subtitle, '')), '') into clean_subtitle;
 
   with input_players as (
     select
@@ -282,11 +289,12 @@ begin
     raise exception 'Debes añadir al menos 2 jugadores válidos';
   end if;
 
-  insert into public.tournaments (public_id, admin_token, title)
+  insert into public.tournaments (public_id, admin_token, title, subtitle)
   values (
     public.gen_prefixed_id('t'),
     public.gen_prefixed_id('admin'),
-    clean_title
+    clean_title,
+    clean_subtitle
   )
   returning id into t_id;
 
@@ -383,7 +391,7 @@ begin
 end;
 $$;
 
-create or replace function public.update_tournament_title(p_admin_token text, p_title text)
+create or replace function public.update_tournament_title(p_admin_token text, p_title text, p_subtitle text default null)
 returns jsonb
 language plpgsql
 security definer
@@ -392,6 +400,7 @@ as $$
 declare
   t_id uuid;
   clean_title text;
+  clean_subtitle text;
 begin
   select id into t_id
   from public.tournaments
@@ -405,9 +414,11 @@ begin
   if clean_title = '' then
     raise exception 'El título no puede estar vacío';
   end if;
+  clean_subtitle := nullif(trim(coalesce(p_subtitle, '')), '');
 
   update public.tournaments
-  set title = clean_title
+  set title = clean_title,
+      subtitle = clean_subtitle
   where id = t_id;
 
   return public.tournament_payload(t_id, true);
@@ -638,10 +649,10 @@ revoke all on public.players from anon, authenticated;
 revoke all on public.matches from anon, authenticated;
 revoke all on public.scoring_rules from anon, authenticated;
 
-grant execute on function public.create_tournament(text, jsonb) to anon, authenticated;
+grant execute on function public.create_tournament(text, jsonb, text) to anon, authenticated;
 grant execute on function public.get_tournament_public(text) to anon, authenticated;
 grant execute on function public.get_tournament_admin(text) to anon, authenticated;
-grant execute on function public.update_tournament_title(text, text) to anon, authenticated;
+grant execute on function public.update_tournament_title(text, text, text) to anon, authenticated;
 grant execute on function public.update_player(text, uuid, text, integer) to anon, authenticated;
 grant execute on function public.add_player(text, text, integer) to anon, authenticated;
 grant execute on function public.delete_player(text, uuid) to anon, authenticated;

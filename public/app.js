@@ -10,11 +10,13 @@ const els = {
   homeView: document.getElementById('home-view'),
   tournamentView: document.getElementById('tournament-view'),
   tournamentTitleInput: document.getElementById('tournament-title'),
+  tournamentSubtitleInput: document.getElementById('tournament-subtitle'),
   playersList: document.getElementById('players-list'),
   addPlayerBtn: document.getElementById('add-player-btn'),
   createTournamentBtn: document.getElementById('create-tournament-btn'),
   homeMessage: document.getElementById('home-message'),
   tournamentTitleView: document.getElementById('tournament-title-view'),
+  tournamentSubtitleView: document.getElementById('tournament-subtitle-view'),
   sharePublic: document.getElementById('share-public'),
   shareAdmin: document.getElementById('share-admin'),
   copyPublicLink: document.getElementById('copy-public-link'),
@@ -31,6 +33,7 @@ const els = {
   actionsHead: document.getElementById('actions-head'),
   configTabBtn: document.getElementById('config-tab-btn'),
   editTitleInput: document.getElementById('edit-title-input'),
+  editSubtitleInput: document.getElementById('edit-subtitle-input'),
   saveTitleBtn: document.getElementById('save-title-btn'),
   rulesList: document.getElementById('rules-list'),
   addRuleBtn: document.getElementById('add-rule-btn'),
@@ -138,6 +141,7 @@ function goToAdmin(adminToken) {
 
 async function createTournament() {
   const title = els.tournamentTitleInput.value.trim();
+  const subtitle = els.tournamentSubtitleInput.value.trim();
   const players = getPlayersFromUI();
 
   if (!title) {
@@ -152,7 +156,8 @@ async function createTournament() {
   try {
     const data = await rpc('create_tournament', {
       p_title: title,
-      p_players: players
+      p_players: players,
+      p_subtitle: subtitle || null
     });
     goToAdmin(data.adminToken);
   } catch (err) {
@@ -176,6 +181,7 @@ function currentAdminUrl() {
 
 function renderHeader() {
   els.tournamentTitleView.textContent = state.tournament.title;
+  els.tournamentSubtitleView.textContent = state.tournament.subtitle || 'Puedes usar este subtítulo para indicar fechas y lugar del torneo.';
   els.sharePublic.textContent = `Enlace público: ${currentPublicUrl()}`;
 
   if (state.mode === 'admin') {
@@ -357,6 +363,7 @@ function addRuleRow(rule = { winnerHandicap: '', loserHandicap: '', points: '' }
 
 function renderConfig() {
   els.editTitleInput.value = state.tournament.title;
+  els.editSubtitleInput.value = state.tournament.subtitle || '';
   els.rulesList.innerHTML = '';
   const rules = getRulesArrayFromState();
   if (rules.length === 0) {
@@ -528,6 +535,7 @@ async function savePlayer(playerId, rowEl) {
 
 async function saveTitle() {
   const title = els.editTitleInput.value.trim();
+  const subtitle = els.editSubtitleInput.value.trim();
   if (!title) {
     showMessage(els.configMessage, 'El título no puede estar vacío.', true);
     return;
@@ -536,7 +544,8 @@ async function saveTitle() {
   try {
     const payload = await rpc('update_tournament_title', {
       p_admin_token: state.adminToken,
-      p_title: title
+      p_title: title,
+      p_subtitle: subtitle || null
     });
     applyTournamentFromPayload(payload);
     switchTab('config');

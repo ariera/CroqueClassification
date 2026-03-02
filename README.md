@@ -6,6 +6,7 @@ Aplicación web para gestionar torneos de croquet formato round-robin (todos con
 
 - Alta de jugadores (nombre y hándicap)
 - Creación automática de emparejamientos round-robin
+- Subtítulo opcional del torneo (p. ej. fechas y lugar), visible en cabecera
 - Tabla de resultados:
   - Jugador 1, Jugador 2
   - Fecha (editable solo admin)
