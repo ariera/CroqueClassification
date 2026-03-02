@@ -44,8 +44,8 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 16px;
-  margin-bottom: 16px;
+  gap: 10px;
+  margin-bottom: 10px;
 }
 
 h1,
@@ -56,22 +56,15 @@ h4 {
   font-family: 'Space Grotesk', sans-serif;
 }
 
-.eyebrow {
-  margin: 0;
-  color: var(--accent);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  font-size: 0.72rem;
-  font-weight: 700;
-}
-
 .mode-badge {
   background: var(--brand);
   color: white;
-  padding: 8px 12px;
+  padding: 6px 10px;
   border-radius: 999px;
-  font-size: 0.84rem;
+  font-size: 0.78rem;
   font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
 }
 
 .card {
@@ -84,6 +77,14 @@ h4 {
 
 .tournament-head {
   margin-bottom: 16px;
+}
+
+.tournament-head h2 {
+  font-size: 1.32rem;
+}
+
+.tournament-head p {
+  margin-top: 4px;
 }
 
 .share-actions {
@@ -151,6 +152,19 @@ h4 {
 
 .rule-row {
   grid-template-columns: 1fr 1fr 1fr auto;
+  align-items: end;
+}
+
+.rule-cell {
+  display: grid;
+  gap: 4px;
+}
+
+.rule-cell-label {
+  display: none;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 700;
 }
 
 .inline {
@@ -227,6 +241,26 @@ h4 {
   margin-bottom: 12px;
 }
 
+.config-head-actions {
+  margin-top: 10px;
+}
+
+.section-divider {
+  border: 0;
+  border-top: 1px solid var(--line);
+  margin: 14px 0;
+}
+
+.rules-header {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr auto;
+  gap: 8px;
+  margin-bottom: 8px;
+  color: var(--muted);
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
 .table-wrap {
   overflow-x: auto;
 }
@@ -276,19 +310,69 @@ td .input {
 @media (max-width: 760px) {
   .shell {
     width: min(96vw, 720px);
-    margin-top: 14px;
+    margin-top: 10px;
   }
 
   .topbar {
-    flex-direction: column;
-    align-items: flex-start;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+
+  h1 {
+    font-size: 1.35rem;
+    line-height: 1.1;
+  }
+
+  .mode-badge {
+    font-size: 0.68rem;
+    padding: 5px 8px;
+    max-width: 56vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .card {
+    padding: 12px;
+  }
+
+  .tournament-head {
+    margin-bottom: 10px;
+  }
+
+  .tournament-head h2 {
+    font-size: 1.16rem;
+  }
+
+  .tournament-head p {
+    font-size: 0.8rem;
+    margin-top: 3px;
   }
 
   .player-row {
     grid-template-columns: 1fr 1fr auto;
   }
 
+  .rules-header {
+    display: none;
+  }
+
   .rule-row {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
+    gap: 8px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 10px;
+    background: var(--surface-strong);
+  }
+
+  .rule-cell-label {
+    display: block;
+  }
+
+  .rule-row .btn-danger {
+    width: 100%;
   }
 }

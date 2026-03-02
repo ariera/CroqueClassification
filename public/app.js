@@ -357,7 +357,27 @@ function addRuleRow(rule = { winnerHandicap: '', loserHandicap: '', points: '' }
   removeBtn.textContent = 'Quitar';
   removeBtn.addEventListener('click', () => row.remove());
 
-  row.append(winnerH, loserH, points, removeBtn);
+  const winnerCell = document.createElement('div');
+  winnerCell.className = 'rule-cell';
+  winnerCell.innerHTML = '<span class="rule-cell-label">Hándicap ganador</span>';
+  winnerCell.appendChild(winnerH);
+
+  const loserCell = document.createElement('div');
+  loserCell.className = 'rule-cell';
+  loserCell.innerHTML = '<span class="rule-cell-label">Hándicap perdedor</span>';
+  loserCell.appendChild(loserH);
+
+  const pointsCell = document.createElement('div');
+  pointsCell.className = 'rule-cell';
+  pointsCell.innerHTML = '<span class="rule-cell-label">Puntos</span>';
+  pointsCell.appendChild(points);
+
+  const actionCell = document.createElement('div');
+  actionCell.className = 'rule-cell';
+  actionCell.innerHTML = '<span class="rule-cell-label">Acción</span>';
+  actionCell.appendChild(removeBtn);
+
+  row.append(winnerCell, loserCell, pointsCell, actionCell);
   els.rulesList.appendChild(row);
 }
 

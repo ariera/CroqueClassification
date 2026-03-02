@@ -7,14 +7,13 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="./styles.css?v=20260302c" />
+    <link rel="stylesheet" href="./styles.css?v=20260303a" />
   </head>
   <body>
     <div class="bg-glow"></div>
     <main class="shell">
       <header class="topbar">
         <div>
-          <p class="eyebrow">Croquet social</p>
           <h1 id="main-title">Corquet League</h1>
         </div>
         <p id="mode-badge" class="mode-badge hidden"></p>
@@ -76,7 +75,6 @@
               <tbody id="results-body"></tbody>
             </table>
           </div>
-          <p class="muted small">Regla: gana quien tenga más aros (máximo 7 por jugador). Empatar no está permitido.</p>
         </section>
 
         <section id="standings-tab" class="card tab-panel hidden">
@@ -142,18 +140,26 @@
           <h3>Configuración del torneo</h3>
 
           <label class="label" for="edit-title-input">Título</label>
-          <div class="inline">
-            <input id="edit-title-input" class="input" />
-            <button id="save-title-btn" class="btn btn-primary" type="button">Guardar cabecera</button>
-          </div>
+          <input id="edit-title-input" class="input" />
           <label class="label" for="edit-subtitle-input">Subtítulo (opcional)</label>
           <input id="edit-subtitle-input" class="input" placeholder="Ej: Del 12 al 14 de abril · Club de Campo" />
+          <div class="inline config-head-actions">
+            <button id="save-title-btn" class="btn btn-primary" type="button">Guardar cabecera</button>
+          </div>
+
+          <hr class="section-divider" />
 
           <h4>Reglas de puntos por hándicap</h4>
           <p class="muted small">
             Define puntos para el ganador según (hándicap ganador, hándicap rival). Si no existe una regla, se usa 1 punto por victoria.
           </p>
 
+          <div class="rules-header" aria-hidden="true">
+            <span>Hándicap ganador</span>
+            <span>Hándicap perdedor</span>
+            <span>Puntos</span>
+            <span>Acción</span>
+          </div>
           <div id="rules-list" class="rules-list"></div>
           <div class="inline">
             <button id="add-rule-btn" class="btn btn-light" type="button">Añadir regla</button>
@@ -166,7 +172,7 @@
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="./config.js?v=20260302c"></script>
-    <script src="./app.js?v=20260302c"></script>
+    <script src="./config.js?v=20260303a"></script>
+    <script src="./app.js?v=20260303a"></script>
   </body>
 </html>
