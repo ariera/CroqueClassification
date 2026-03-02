@@ -54,12 +54,12 @@ function requireConfig() {
 }
 
 const cfg = requireConfig();
-const supabase = window.supabase.createClient(cfg.url, cfg.key, {
+const supabaseClient = window.supabase.createClient(cfg.url, cfg.key, {
   auth: { persistSession: false, autoRefreshToken: false }
 });
 
 async function rpc(fn, params = {}) {
-  const { data, error } = await supabase.rpc(fn, params);
+  const { data, error } = await supabaseClient.rpc(fn, params);
   if (error) throw new Error(error.message || 'Error de Supabase');
   return data;
 }
