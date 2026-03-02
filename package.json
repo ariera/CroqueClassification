@@ -1,5 +1,5 @@
 {
-  "name": "croque-classification",
+  "name": "corquet-league",
   "version": "1.0.0",
   "description": "Gestor de torneos de croquet round-robin",
   "main": "server.js",

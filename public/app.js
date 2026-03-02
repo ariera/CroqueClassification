@@ -38,6 +38,7 @@ const tabPanels = {
   results: document.getElementById('results-tab'),
   standings: document.getElementById('standings-tab'),
   players: document.getElementById('players-tab'),
+  share: document.getElementById('share-tab'),
   config: document.getElementById('config-tab')
 };
 
@@ -170,11 +171,11 @@ function currentAdminUrl() {
 
 function renderHeader() {
   els.tournamentTitleView.textContent = state.tournament.title;
-  els.sharePublic.innerHTML = `Enlace público: <strong>${currentPublicUrl()}</strong>`;
+  els.sharePublic.textContent = `Enlace público: ${currentPublicUrl()}`;
 
   if (state.mode === 'admin') {
     els.shareAdmin.classList.remove('hidden');
-    els.shareAdmin.innerHTML = `Enlace admin: <strong>${currentAdminUrl()}</strong>`;
+    els.shareAdmin.textContent = `Enlace admin: ${currentAdminUrl()}`;
     els.copyAdminLink.classList.remove('hidden');
   } else {
     els.shareAdmin.classList.add('hidden');

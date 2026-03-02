@@ -82,10 +82,7 @@ h4 {
   box-shadow: 0 10px 30px rgba(16, 24, 40, 0.06);
 }
 
-.share-card {
-  display: flex;
-  justify-content: space-between;
-  gap: 16px;
+.tournament-head {
   margin-bottom: 16px;
 }
 
@@ -94,6 +91,22 @@ h4 {
   flex-wrap: wrap;
   gap: 8px;
   align-content: flex-start;
+}
+
+.share-links {
+  margin-top: 12px;
+}
+
+.share-links summary {
+  cursor: pointer;
+  font-weight: 700;
+  color: var(--brand-strong);
+}
+
+.share-links p {
+  margin: 8px 0 0;
+  word-break: break-word;
+  overflow-wrap: anywhere;
 }
 
 .label {
@@ -262,7 +275,6 @@ td .input {
     margin-top: 14px;
   }
 
-  .share-card,
   .topbar {
     flex-direction: column;
     align-items: flex-start;

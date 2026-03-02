@@ -1,4 +1,4 @@
-# CroqueClassification (GitHub Pages + Supabase)
+# Corquet League (GitHub Pages + Supabase)
 
 Aplicación web para gestionar torneos de croquet formato round-robin (todos contra todos), lista para publicarse como frontend estático en GitHub Pages.
 

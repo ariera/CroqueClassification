@@ -404,5 +404,5 @@ app.get(['/t/:publicId', '/a/:adminToken'], (_req, res) => {
 app.listen(PORT, () => {
   ensureDb();
   // eslint-disable-next-line no-console
-  console.log(`CroqueClassification disponible en http://localhost:${PORT}`);
+  console.log(`Corquet League disponible en http://localhost:${PORT}`);
 });
