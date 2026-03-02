@@ -19,6 +19,8 @@ Aplicación web para gestionar torneos de croquet formato round-robin (todos con
   - Puntos
 - Tabla de jugadores (público y admin)
 - Edición de nombre/hándicap de jugadores (solo admin)
+- Alta de jugadores después de crear torneo (solo admin)
+- Borrado de jugadores sin resultados cargados (solo admin, con error amigable si no aplica)
 - Cálculo automático de puntos por hándicap
 - Enlace público (solo lectura) y enlace admin (edición)
 

@@ -23,6 +23,11 @@ const els = {
   standingsBody: document.getElementById('standings-body'),
   playersBody: document.getElementById('players-body'),
   playersActionsHead: document.getElementById('players-actions-head'),
+  addPlayerAdminBox: document.getElementById('add-player-admin-box'),
+  newPlayerName: document.getElementById('new-player-name'),
+  newPlayerHandicap: document.getElementById('new-player-handicap'),
+  addPlayerAdminBtn: document.getElementById('add-player-admin-btn'),
+  playersMessage: document.getElementById('players-message'),
   actionsHead: document.getElementById('actions-head'),
   configTabBtn: document.getElementById('config-tab-btn'),
   editTitleInput: document.getElementById('edit-title-input'),
@@ -273,6 +278,7 @@ function renderPlayers() {
   const isAdmin = state.mode === 'admin';
   els.playersBody.innerHTML = '';
   els.playersActionsHead.classList.toggle('hidden', !isAdmin);
+  els.addPlayerAdminBox.classList.toggle('hidden', !isAdmin);
 
   const list = [...state.tournament.players].sort((a, b) => a.name.localeCompare(b.name, 'es'));
   list.forEach((player) => {
@@ -298,9 +304,19 @@ function renderPlayers() {
       saveBtn.textContent = 'Guardar';
       saveBtn.addEventListener('click', () => savePlayer(player.id, tr));
 
+      const deleteBtn = document.createElement('button');
+      deleteBtn.className = 'btn btn-danger';
+      deleteBtn.type = 'button';
+      deleteBtn.textContent = 'Borrar';
+      deleteBtn.addEventListener('click', () => deletePlayer(player.id));
+
+      const actionWrap = document.createElement('div');
+      actionWrap.className = 'inline';
+      actionWrap.append(saveBtn, deleteBtn);
+
       tdName.appendChild(nameInput);
       tdHandicap.appendChild(handicapInput);
-      tdAction.appendChild(saveBtn);
+      tdAction.appendChild(actionWrap);
     } else {
       tdName.textContent = player.name;
       tdHandicap.textContent = String(player.handicap);
@@ -347,6 +363,52 @@ function renderConfig() {
     addRuleRow();
   } else {
     rules.forEach((r) => addRuleRow(r));
+  }
+}
+
+async function addPlayerAdmin() {
+  if (state.mode !== 'admin') return;
+  const name = els.newPlayerName.value.trim();
+  const rawHandicap = els.newPlayerHandicap.value;
+  const handicap = parseNullableInt(rawHandicap);
+
+  if (!name) {
+    showMessage(els.playersMessage, 'El nombre no puede estar vacío.', true);
+    return;
+  }
+  if (handicap == null) {
+    showMessage(els.playersMessage, 'Hándicap inválido.', true);
+    return;
+  }
+
+  try {
+    const payload = await rpc('add_player', {
+      p_admin_token: state.adminToken,
+      p_name: name,
+      p_handicap: handicap
+    });
+    applyTournamentFromPayload(payload);
+    switchTab('players');
+    els.newPlayerName.value = '';
+    els.newPlayerHandicap.value = '';
+    showMessage(els.playersMessage, 'Jugador añadido.');
+  } catch (err) {
+    showMessage(els.playersMessage, err.message || 'No se pudo añadir el jugador.', true);
+  }
+}
+
+async function deletePlayer(playerId) {
+  if (state.mode !== 'admin') return;
+  try {
+    const payload = await rpc('delete_player', {
+      p_admin_token: state.adminToken,
+      p_player_id: playerId
+    });
+    applyTournamentFromPayload(payload);
+    switchTab('players');
+    showMessage(els.playersMessage, 'Jugador borrado.');
+  } catch (err) {
+    showMessage(els.playersMessage, err.message || 'No se pudo borrar el jugador.', true);
   }
 }
 
@@ -536,6 +598,7 @@ function attachEvents() {
   els.saveTitleBtn.addEventListener('click', saveTitle);
   els.addRuleBtn.addEventListener('click', () => addRuleRow());
   els.saveRulesBtn.addEventListener('click', saveRules);
+  els.addPlayerAdminBtn.addEventListener('click', addPlayerAdmin);
 
   window.addEventListener('hashchange', loadTournament);
 }

@@ -97,6 +97,15 @@
 
         <section id="players-tab" class="card tab-panel hidden">
           <h3>Lista de jugadores</h3>
+          <div id="add-player-admin-box" class="add-player-admin hidden">
+            <p class="muted small">Añadir jugador al torneo</p>
+            <div class="inline">
+              <input id="new-player-name" class="input" placeholder="Nombre del jugador" />
+              <input id="new-player-handicap" class="input" type="number" step="1" placeholder="Hándicap" />
+              <button id="add-player-admin-btn" class="btn btn-primary" type="button">Añadir</button>
+            </div>
+            <div id="players-message" class="message"></div>
+          </div>
           <div class="table-wrap">
             <table>
               <thead>

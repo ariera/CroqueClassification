@@ -453,6 +453,98 @@ begin
 end;
 $$;
 
+create or replace function public.add_player(p_admin_token text, p_name text, p_handicap integer)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  t_id uuid;
+  new_player_id uuid;
+  clean_name text;
+begin
+  select id into t_id
+  from public.tournaments
+  where admin_token = p_admin_token;
+
+  if t_id is null then
+    raise exception 'Torneo no encontrado';
+  end if;
+
+  clean_name := trim(coalesce(p_name, ''));
+  if clean_name = '' then
+    raise exception 'El nombre no puede estar vacío';
+  end if;
+
+  if p_handicap is null then
+    raise exception 'Hándicap inválido';
+  end if;
+
+  insert into public.players (tournament_id, name, handicap)
+  values (t_id, clean_name, p_handicap)
+  returning id into new_player_id;
+
+  insert into public.matches (tournament_id, p1_player_id, p2_player_id)
+  select
+    t_id,
+    case when p.id < new_player_id then p.id else new_player_id end,
+    case when p.id < new_player_id then new_player_id else p.id end
+  from public.players p
+  where p.tournament_id = t_id
+    and p.id <> new_player_id;
+
+  perform public.recalculate_tournament(t_id);
+  return public.tournament_payload(t_id, true);
+end;
+$$;
+
+create or replace function public.delete_player(p_admin_token text, p_player_id uuid)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  t_id uuid;
+  players_count int;
+begin
+  select t.id into t_id
+  from public.tournaments t
+  join public.players p on p.tournament_id = t.id
+  where t.admin_token = p_admin_token
+    and p.id = p_player_id;
+
+  if t_id is null then
+    raise exception 'Jugador o torneo no encontrado';
+  end if;
+
+  if exists (
+    select 1
+    from public.matches m
+    where m.tournament_id = t_id
+      and (m.p1_player_id = p_player_id or m.p2_player_id = p_player_id)
+      and (m.score1 is not null or m.score2 is not null)
+  ) then
+    raise exception 'No puedes borrar este jugador porque ya tiene resultados cargados';
+  end if;
+
+  select count(*) into players_count
+  from public.players
+  where tournament_id = t_id;
+
+  if players_count <= 2 then
+    raise exception 'El torneo debe tener al menos 2 jugadores';
+  end if;
+
+  delete from public.players
+  where id = p_player_id;
+
+  perform public.recalculate_tournament(t_id);
+  return public.tournament_payload(t_id, true);
+end;
+$$;
+
 create or replace function public.update_match(
   p_admin_token text,
   p_match_id uuid,
@@ -551,5 +643,7 @@ grant execute on function public.get_tournament_public(text) to anon, authentica
 grant execute on function public.get_tournament_admin(text) to anon, authenticated;
 grant execute on function public.update_tournament_title(text, text) to anon, authenticated;
 grant execute on function public.update_player(text, uuid, text, integer) to anon, authenticated;
+grant execute on function public.add_player(text, text, integer) to anon, authenticated;
+grant execute on function public.delete_player(text, uuid) to anon, authenticated;
 grant execute on function public.update_match(text, uuid, integer, integer, date) to anon, authenticated;
 grant execute on function public.update_scoring_rules(text, jsonb) to anon, authenticated;
