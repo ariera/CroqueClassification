@@ -1,0 +1,105 @@
+{
+  "tournaments": [
+    {
+      "publicId": "t_c2e53481a84445b1",
+      "adminToken": "admin_d969629d7a788388",
+      "title": "los domingos",
+      "createdAt": "2026-03-02T19:36:38.021Z",
+      "players": [
+        {
+          "id": "p_da9e6e3f8f824269",
+          "name": "Espe",
+          "handicap": 6
+        },
+        {
+          "id": "p_85db190fdc80d23e",
+          "name": "Jose P",
+          "handicap": 6
+        },
+        {
+          "id": "p_de5538389fd7fe41",
+          "name": "Jose Fig",
+          "handicap": 8
+        },
+        {
+          "id": "p_4d8fb05c528c3464",
+          "name": "Pilar",
+          "handicap": 7
+        }
+      ],
+      "scoringRules": {
+        "6|6": 10,
+        "6|7": 9,
+        "6|8": 8,
+        "7|6": 11,
+        "7|7": 10,
+        "7|8": 9,
+        "8|6": 12,
+        "8|7": 11,
+        "8|8": 10
+      },
+      "matches": [
+        {
+          "id": "m_91c1cad6a640d5cf",
+          "p1Id": "p_da9e6e3f8f824269",
+          "p2Id": "p_85db190fdc80d23e",
+          "score1": 7,
+          "score2": 6,
+          "points1": 10,
+          "points2": 0,
+          "played": true
+        },
+        {
+          "id": "m_f4d04150477f8191",
+          "p1Id": "p_da9e6e3f8f824269",
+          "p2Id": "p_de5538389fd7fe41",
+          "score1": 6,
+          "score2": 7,
+          "points1": 0,
+          "points2": 12,
+          "played": true
+        },
+        {
+          "id": "m_e4af37333933b507",
+          "p1Id": "p_da9e6e3f8f824269",
+          "p2Id": "p_4d8fb05c528c3464",
+          "score1": null,
+          "score2": null,
+          "points1": 0,
+          "points2": 0,
+          "played": false
+        },
+        {
+          "id": "m_458131a0278cdd40",
+          "p1Id": "p_85db190fdc80d23e",
+          "p2Id": "p_de5538389fd7fe41",
+          "score1": null,
+          "score2": null,
+          "points1": 0,
+          "points2": 0,
+          "played": false
+        },
+        {
+          "id": "m_ed82e185f739f256",
+          "p1Id": "p_85db190fdc80d23e",
+          "p2Id": "p_4d8fb05c528c3464",
+          "score1": null,
+          "score2": null,
+          "points1": 0,
+          "points2": 0,
+          "played": false
+        },
+        {
+          "id": "m_dd4242ba8c228c29",
+          "p1Id": "p_de5538389fd7fe41",
+          "p2Id": "p_4d8fb05c528c3464",
+          "score1": null,
+          "score2": null,
+          "points1": 0,
+          "points2": 0,
+          "played": false
+        }
+      ]
+    }
+  ]
+}

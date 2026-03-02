@@ -1,0 +1,278 @@
+:root {
+  --bg: #f8f6ef;
+  --surface: #fffdf8;
+  --surface-strong: #fffaf0;
+  --text: #1e2a2f;
+  --muted: #5f6d72;
+  --line: #dad5c8;
+  --brand: #0f766e;
+  --brand-strong: #0b5b56;
+  --accent: #d97706;
+  --danger: #b42318;
+  --radius: 14px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'DM Sans', sans-serif;
+  color: var(--text);
+  background:
+    radial-gradient(circle at 10% 0%, rgba(217, 119, 6, 0.13), transparent 35%),
+    radial-gradient(circle at 90% 20%, rgba(15, 118, 110, 0.14), transparent 30%),
+    var(--bg);
+  min-height: 100vh;
+}
+
+.bg-glow {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.2), transparent 40%);
+}
+
+.shell {
+  width: min(1100px, 94vw);
+  margin: 24px auto 40px;
+  position: relative;
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  margin: 0;
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+.eyebrow {
+  margin: 0;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.mode-badge {
+  background: var(--brand);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 18px;
+  box-shadow: 0 10px 30px rgba(16, 24, 40, 0.06);
+}
+
+.share-card {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.share-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-content: flex-start;
+}
+
+.label {
+  display: block;
+  font-size: 0.9rem;
+  margin: 12px 0 6px;
+  color: var(--muted);
+}
+
+.input {
+  width: 100%;
+  background: var(--surface-strong);
+  border: 1px solid var(--line);
+  color: var(--text);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 1rem;
+}
+
+.input:focus {
+  outline: 2px solid rgba(15, 118, 110, 0.25);
+  border-color: var(--brand);
+}
+
+.players-list,
+.rules-list {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.player-row,
+.rule-row {
+  display: grid;
+  grid-template-columns: 1fr 120px auto;
+  gap: 8px;
+}
+
+.rule-row {
+  grid-template-columns: 1fr 1fr 1fr auto;
+}
+
+.inline {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.btn {
+  border: 0;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: transform 0.14s ease, background 0.14s ease;
+}
+
+.btn:active {
+  transform: scale(0.98);
+}
+
+.btn-primary {
+  background: var(--brand);
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background: var(--brand-strong);
+}
+
+.btn-light {
+  background: #efe9da;
+  color: var(--text);
+}
+
+.btn-danger {
+  background: #f9d9d5;
+  color: var(--danger);
+}
+
+.section-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 14px 0 8px;
+}
+
+.tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.tab-btn {
+  border: 1px solid var(--line);
+  background: #f3efe3;
+  color: var(--text);
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.tab-btn.active {
+  border-color: transparent;
+  background: var(--brand);
+  color: #fff;
+}
+
+.tab-panel {
+  margin-bottom: 12px;
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 660px;
+}
+
+th,
+td {
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  padding: 10px 8px;
+  font-size: 0.95rem;
+}
+
+th {
+  color: var(--muted);
+  font-weight: 700;
+}
+
+td .input {
+  min-width: 72px;
+  padding: 7px 8px;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.small {
+  font-size: 0.84rem;
+}
+
+.message {
+  margin-top: 10px;
+  min-height: 1.2em;
+  color: var(--brand-strong);
+}
+
+.hidden {
+  display: none !important;
+}
+
+@media (max-width: 760px) {
+  .shell {
+    width: min(96vw, 720px);
+    margin-top: 14px;
+  }
+
+  .share-card,
+  .topbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .player-row {
+    grid-template-columns: 1fr 1fr auto;
+  }
+
+  .rule-row {
+    grid-template-columns: 1fr 1fr;
+  }
+}
