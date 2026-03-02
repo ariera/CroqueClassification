@@ -56,6 +56,7 @@ Si una combinación no existe, vale 1 punto por victoria.
 
 1. Crea un proyecto en Supabase.
 2. En `SQL Editor`, ejecuta completo el archivo [`supabase.sql`](/Users/mainar/Documents/CroqueClassification/supabase.sql).
+   - Si ya lo ejecutaste antes, vuelve a ejecutarlo para aplicar actualizaciones de funciones RPC.
 3. Ve a `Project Settings -> API` y copia:
    - `Project URL`
    - `anon public key`

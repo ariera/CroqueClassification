@@ -379,7 +379,6 @@ begin
     raise exception 'Torneo no encontrado';
   end if;
 
-  perform public.recalculate_tournament(t_id);
   return public.tournament_payload(t_id, true);
 end;
 $$;
