@@ -51,7 +51,7 @@ Si una combinación no existe, vale 1 punto por victoria.
 
 ## Arquitectura
 
-- Frontend estático: `public/` (GitHub Pages)
+- Frontend React (CDN + Babel) estático en `public/` (GitHub Pages)
 - Persistencia + lógica: Supabase Postgres + funciones RPC (archivo `supabase.sql`)
 - Sin servidor Node obligatorio en producción
 
@@ -76,9 +76,7 @@ window.APP_CONFIG = {
 
 1. Sube el repositorio a GitHub.
 2. En `Settings -> Pages`:
-   - `Source`: `Deploy from a branch`
-   - `Branch`: `main` (o la tuya)
-   - `Folder`: `/public`
+   - `Source`: `GitHub Actions`
 3. Guarda y espera la URL de Pages.
 4. Abre la URL y crea torneo.
 
