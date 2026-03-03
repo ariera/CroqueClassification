@@ -539,8 +539,14 @@ function App() {
       .replace(/[^a-z0-9]+/g, '_')
       .replace(/^_+|_+$/g, '')
       .slice(0, 40) || 'torneo';
+    const y = exportDate.getFullYear();
+    const m = String(exportDate.getMonth() + 1).padStart(2, '0');
+    const d = String(exportDate.getDate()).padStart(2, '0');
+    const hh = String(exportDate.getHours()).padStart(2, '0');
+    const mm = String(exportDate.getMinutes()).padStart(2, '0');
+    const ts = `${y}-${m}-${d}_${hh}${mm}`;
 
-    window.XLSX.writeFile(wb, `${safeTitle}.xlsx`);
+    window.XLSX.writeFile(wb, `${safeTitle}_${ts}.xlsx`);
   }
 
   const publicUrl = tournament ? `${window.location.origin}${window.location.pathname}#/t/${tournament.publicId}` : '';
