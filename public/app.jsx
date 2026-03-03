@@ -476,6 +476,73 @@ function App() {
     }
   }
 
+  function downloadTournamentExcel() {
+    if (!tournament) return;
+    if (!window.XLSX) {
+      window.alert('No se pudo cargar la librería de Excel.');
+      return;
+    }
+
+    const exportDate = new Date();
+    const infoRows = [
+      { campo: 'titulo', valor: tournament.title || '' },
+      { campo: 'subtitulo', valor: tournament.subtitle || '' },
+      { campo: 'fecha_exportacion', valor: exportDate.toISOString() },
+      { campo: 'fecha_exportacion_local', valor: exportDate.toLocaleString() },
+      { campo: 'enlace_publico', valor: publicUrl }
+    ];
+    if (isAdmin) {
+      infoRows.push({ campo: 'enlace_admin', valor: adminUrl });
+    }
+
+    const playersRows = (tournament.players || []).map((p) => ({
+      nombre: p.name,
+      handicap: p.handicap
+    }));
+
+    const resultsRows = (tournament.matches || []).map((m) => ({
+      jugador_1: playerMap.get(m.p1Id) || 'Jugador',
+      jugador_2: playerMap.get(m.p2Id) || 'Jugador',
+      fecha: m.matchDate || '',
+      aros_j1: m.score1 ?? '',
+      aros_j2: m.score2 ?? '',
+      puntos_j1: m.points1 ?? 0,
+      puntos_j2: m.points2 ?? 0
+    }));
+
+    const standingsRows = (tournament.standings || []).map((s) => ({
+      jugador: s.name,
+      jugados: s.played,
+      ganados: s.won,
+      diferencia_aros: s.hoopDiff,
+      puntos: s.points
+    }));
+
+    const rulesRows = Object.entries(tournament.scoringRules || {}).map(([key, points]) => {
+      const [winnerHandicap, loserHandicap] = key.split('|');
+      return {
+        handicap_ganador: Number(winnerHandicap),
+        handicap_perdedor: Number(loserHandicap),
+        puntos: points
+      };
+    });
+
+    const wb = window.XLSX.utils.book_new();
+    window.XLSX.utils.book_append_sheet(wb, window.XLSX.utils.json_to_sheet(infoRows), 'campeonato');
+    window.XLSX.utils.book_append_sheet(wb, window.XLSX.utils.json_to_sheet(playersRows), 'jugadores');
+    window.XLSX.utils.book_append_sheet(wb, window.XLSX.utils.json_to_sheet(resultsRows), 'resultados');
+    window.XLSX.utils.book_append_sheet(wb, window.XLSX.utils.json_to_sheet(standingsRows), 'clasificacion');
+    window.XLSX.utils.book_append_sheet(wb, window.XLSX.utils.json_to_sheet(rulesRows), 'reglas_handicap');
+
+    const safeTitle = (tournament.title || 'torneo')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '_')
+      .replace(/^_+|_+$/g, '')
+      .slice(0, 40) || 'torneo';
+
+    window.XLSX.writeFile(wb, `${safeTitle}.xlsx`);
+  }
+
   const publicUrl = tournament ? `${window.location.origin}${window.location.pathname}#/t/${tournament.publicId}` : '';
   const adminUrl = tournament && route.mode === 'admin' ? `${window.location.origin}${window.location.pathname}#/a/${route.id}` : '';
 
@@ -679,6 +746,7 @@ function App() {
               <div className="share-actions">
                 <button className="btn btn-light" type="button" onClick={() => copyText(publicUrl)}>Copiar enlace público</button>
                 {isAdmin && <button className="btn btn-light" type="button" onClick={() => copyText(adminUrl)}>Copiar enlace admin</button>}
+                <button className="btn btn-primary" type="button" onClick={downloadTournamentExcel}>Descargar Excel</button>
               </div>
               <details className="share-links">
                 <summary>Ver enlaces completos</summary>

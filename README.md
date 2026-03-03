@@ -18,6 +18,7 @@ Aplicación web para gestionar torneos de croquet formato round-robin (todos con
   - Ganados
   - Diferencia de aros
   - Puntos
+- Exportación a Excel con hojas: `campeonato`, `jugadores`, `resultados`, `clasificacion`, `reglas_handicap`
 - Tabla de jugadores (público y admin)
 - Edición de nombre/hándicap de jugadores (solo admin)
 - Alta de jugadores después de crear torneo (solo admin)
