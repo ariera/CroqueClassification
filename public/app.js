@@ -17,10 +17,11 @@ const els = {
   addPlayerBtn: document.getElementById('add-player-btn'),
   createTournamentBtn: document.getElementById('create-tournament-btn'),
   homeMessage: document.getElementById('home-message'),
+  homeIndexCard: document.getElementById('home-index-card'),
   homeIndexList: document.getElementById('home-index-list'),
+  brandHomeLink: document.getElementById('brand-home-link'),
   tournamentTitleView: document.getElementById('tournament-title-view'),
   tournamentSubtitleView: document.getElementById('tournament-subtitle-view'),
-  goHomeBtn: document.getElementById('go-home-btn'),
   sharePublic: document.getElementById('share-public'),
   shareAdmin: document.getElementById('share-admin'),
   copyPublicLink: document.getElementById('copy-public-link'),
@@ -147,12 +148,10 @@ function renderHomeIndex() {
   els.homeIndexList.innerHTML = '';
 
   if (items.length === 0) {
-    const empty = document.createElement('p');
-    empty.className = 'muted small';
-    empty.textContent = 'Aún no has abierto ningún torneo desde este dispositivo.';
-    els.homeIndexList.appendChild(empty);
+    els.homeIndexCard.classList.add('hidden');
     return;
   }
+  els.homeIndexCard.classList.remove('hidden');
 
   items.forEach((item) => {
     const row = document.createElement('div');
@@ -717,9 +716,8 @@ function attachEvents() {
   els.addRuleBtn.addEventListener('click', () => addRuleRow());
   els.saveRulesBtn.addEventListener('click', saveRules);
   els.addPlayerAdminBtn.addEventListener('click', addPlayerAdmin);
-  els.goHomeBtn.addEventListener('click', () => {
+  els.brandHomeLink.addEventListener('click', () => {
     window.location.hash = '';
-    loadTournament();
   });
 
   window.addEventListener('hashchange', loadTournament);
