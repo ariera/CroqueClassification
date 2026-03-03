@@ -5,6 +5,8 @@ const state = {
   adminToken: null
 };
 
+const STORAGE_KEY = 'corquet_league_known_tournaments_v1';
+
 const els = {
   modeBadge: document.getElementById('mode-badge'),
   homeView: document.getElementById('home-view'),
@@ -15,8 +17,10 @@ const els = {
   addPlayerBtn: document.getElementById('add-player-btn'),
   createTournamentBtn: document.getElementById('create-tournament-btn'),
   homeMessage: document.getElementById('home-message'),
+  homeIndexList: document.getElementById('home-index-list'),
   tournamentTitleView: document.getElementById('tournament-title-view'),
   tournamentSubtitleView: document.getElementById('tournament-subtitle-view'),
+  goHomeBtn: document.getElementById('go-home-btn'),
   sharePublic: document.getElementById('share-public'),
   shareAdmin: document.getElementById('share-admin'),
   copyPublicLink: document.getElementById('copy-public-link'),
@@ -93,6 +97,84 @@ function createInput(type, placeholder, value = '') {
   input.placeholder = placeholder;
   input.value = value;
   return input;
+}
+
+function readKnownTournaments() {
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (_err) {
+    return [];
+  }
+}
+
+function writeKnownTournaments(items) {
+  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+}
+
+function rememberTournament(entry) {
+  const current = readKnownTournaments();
+  const idx = current.findIndex((x) => x.publicId === entry.publicId);
+  const nowIso = new Date().toISOString();
+
+  if (idx === -1) {
+    current.push({
+      publicId: entry.publicId,
+      adminToken: entry.adminToken || null,
+      title: entry.title || 'Torneo',
+      subtitle: entry.subtitle || null,
+      lastVisitedAt: nowIso
+    });
+  } else {
+    const prev = current[idx];
+    current[idx] = {
+      ...prev,
+      title: entry.title || prev.title,
+      subtitle: entry.subtitle ?? prev.subtitle ?? null,
+      adminToken: entry.adminToken || prev.adminToken || null,
+      lastVisitedAt: nowIso
+    };
+  }
+
+  current.sort((a, b) => new Date(b.lastVisitedAt).getTime() - new Date(a.lastVisitedAt).getTime());
+  writeKnownTournaments(current);
+}
+
+function renderHomeIndex() {
+  const items = readKnownTournaments();
+  els.homeIndexList.innerHTML = '';
+
+  if (items.length === 0) {
+    const empty = document.createElement('p');
+    empty.className = 'muted small';
+    empty.textContent = 'Aún no has abierto ningún torneo desde este dispositivo.';
+    els.homeIndexList.appendChild(empty);
+    return;
+  }
+
+  items.forEach((item) => {
+    const row = document.createElement('div');
+    row.className = 'home-index-row';
+
+    const info = document.createElement('div');
+    info.className = 'home-index-info';
+    const access = item.adminToken ? 'Administrador' : 'Solo lectura';
+    const subtitle = item.subtitle ? ` · ${item.subtitle}` : '';
+    info.innerHTML = `<strong>${item.title || 'Torneo'}</strong><p class="muted small">${access}${subtitle}</p>`;
+
+    const openBtn = document.createElement('button');
+    openBtn.className = 'btn btn-light';
+    openBtn.type = 'button';
+    openBtn.textContent = item.adminToken ? 'Abrir admin' : 'Abrir público';
+    openBtn.addEventListener('click', () => {
+      window.location.hash = item.adminToken ? `#/a/${item.adminToken}` : `#/t/${item.publicId}`;
+    });
+
+    row.append(info, openBtn);
+    els.homeIndexList.appendChild(row);
+  });
 }
 
 function showMessage(element, text, isError = false) {
@@ -460,6 +542,12 @@ function applyTournamentFromPayload(data) {
   state.tournament = data;
   state.publicId = data.publicId;
   if (state.mode === 'admin') state.adminToken = data.adminToken || state.adminToken;
+  rememberTournament({
+    publicId: data.publicId,
+    adminToken: state.mode === 'admin' ? (state.adminToken || data.adminToken || null) : null,
+    title: data.title,
+    subtitle: data.subtitle || null
+  });
 
   els.homeView.classList.add('hidden');
   els.tournamentView.classList.remove('hidden');
@@ -491,6 +579,7 @@ async function loadTournament() {
     els.playersList.innerHTML = '';
     addPlayerRow({ name: '', handicap: 0 });
     addPlayerRow({ name: '', handicap: 0 });
+    renderHomeIndex();
     return;
   }
 
@@ -628,6 +717,10 @@ function attachEvents() {
   els.addRuleBtn.addEventListener('click', () => addRuleRow());
   els.saveRulesBtn.addEventListener('click', saveRules);
   els.addPlayerAdminBtn.addEventListener('click', addPlayerAdmin);
+  els.goHomeBtn.addEventListener('click', () => {
+    window.location.hash = '';
+    loadTournament();
+  });
 
   window.addEventListener('hashchange', loadTournament);
 }

@@ -87,6 +87,10 @@ h4 {
   margin-top: 4px;
 }
 
+.head-actions {
+  margin-top: 10px;
+}
+
 .share-actions {
   display: flex;
   flex-wrap: wrap;
@@ -112,6 +116,26 @@ h4 {
 
 .add-player-admin {
   margin-bottom: 12px;
+}
+
+.home-index-list {
+  display: grid;
+  gap: 10px;
+}
+
+.home-index-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px;
+  background: var(--surface-strong);
+}
+
+.home-index-info p {
+  margin: 4px 0 0;
 }
 
 .label {
@@ -373,6 +397,15 @@ td .input {
   }
 
   .rule-row .btn-danger {
+    width: 100%;
+  }
+
+  .home-index-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .home-index-row .btn {
     width: 100%;
   }
 }
