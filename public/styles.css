@@ -338,6 +338,30 @@ td .input {
   color: var(--brand-strong);
 }
 
+.notice-banner {
+  position: sticky;
+  top: 8px;
+  z-index: 5;
+  margin: 0 0 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.notice-ok {
+  background: #dff5ee;
+  color: #0b5b56;
+  border-color: #9fd7c8;
+}
+
+.notice-error {
+  background: #f9d9d5;
+  color: #b42318;
+  border-color: #f1b3ab;
+}
+
 .hidden {
   display: none !important;
 }
@@ -418,5 +442,10 @@ td .input {
 
   .home-index-row .btn {
     width: 100%;
+  }
+
+  .notice-banner {
+    font-size: 0.84rem;
+    padding: 9px 10px;
   }
 }

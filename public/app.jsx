@@ -231,8 +231,16 @@ function App() {
   const [newPlayerName, setNewPlayerName] = useState('');
   const [newPlayerHandicap, setNewPlayerHandicap] = useState('');
   const [ruleRows, setRuleRows] = useState([]);
+  const [notice, setNotice] = useState({ text: '', error: false, visible: false });
 
   const isAdmin = route.mode === 'admin';
+
+  function showNotice(text, error = false) {
+    setNotice({ text, error, visible: true });
+    window.setTimeout(() => {
+      setNotice((prev) => ({ ...prev, visible: false }));
+    }, 2200);
+  }
 
   useEffect(() => {
     function onRouteChange() {
@@ -367,8 +375,9 @@ function App() {
         p_match_date: matchState.matchDate || null
       });
       updateTournament(payload, true);
+      showNotice('Partido guardado.');
     } catch (err) {
-      window.alert(err.message || 'No se pudo guardar el partido.');
+      showNotice(err.message || 'No se pudo guardar el partido.', true);
     }
   }
 
@@ -382,8 +391,10 @@ function App() {
       });
       updateTournament(payload, true);
       setPlayersMessage({ text: 'Jugador actualizado.', error: false });
+      showNotice('Jugador actualizado.');
     } catch (err) {
       setPlayersMessage({ text: err.message || 'No se pudo actualizar el jugador.', error: true });
+      showNotice(err.message || 'No se pudo actualizar el jugador.', true);
     }
   }
 
@@ -395,8 +406,10 @@ function App() {
       });
       updateTournament(payload, true);
       setPlayersMessage({ text: 'Jugador borrado.', error: false });
+      showNotice('Jugador borrado.');
     } catch (err) {
       setPlayersMessage({ text: err.message || 'No se pudo borrar el jugador.', error: true });
+      showNotice(err.message || 'No se pudo borrar el jugador.', true);
     }
   }
 
@@ -423,8 +436,10 @@ function App() {
       setNewPlayerName('');
       setNewPlayerHandicap('');
       setPlayersMessage({ text: 'Jugador añadido.', error: false });
+      showNotice('Jugador añadido.');
     } catch (err) {
       setPlayersMessage({ text: err.message || 'No se pudo añadir el jugador.', error: true });
+      showNotice(err.message || 'No se pudo añadir el jugador.', true);
     }
   }
 
@@ -442,8 +457,10 @@ function App() {
       });
       updateTournament(payload, true);
       setConfigMessage({ text: 'Cabecera guardada.', error: false });
+      showNotice('Cabecera guardada.');
     } catch (err) {
       setConfigMessage({ text: err.message || 'No se pudo guardar la cabecera.', error: true });
+      showNotice(err.message || 'No se pudo guardar la cabecera.', true);
     }
   }
 
@@ -463,8 +480,10 @@ function App() {
       });
       updateTournament(payload, true);
       setConfigMessage({ text: 'Reglas guardadas.', error: false });
+      showNotice('Reglas guardadas.');
     } catch (err) {
       setConfigMessage({ text: err.message || 'No se pudieron guardar las reglas.', error: true });
+      showNotice(err.message || 'No se pudieron guardar las reglas.', true);
     }
   }
 
@@ -578,6 +597,12 @@ function App() {
           <p className="mode-badge">{isAdmin ? 'Modo administrador' : 'Modo público (solo lectura)'}</p>
         )}
       </header>
+
+      {notice.visible && (
+        <div className={`notice-banner ${notice.error ? 'notice-error' : 'notice-ok'}`}>
+          {notice.text}
+        </div>
+      )}
 
       {route.mode === 'home' && (
         <section id="home-view" className="home-stack">
