@@ -100,6 +100,10 @@ function parseNullableInt(raw) {
   return Number.isInteger(n) ? n : null;
 }
 
+function wait(ms) {
+  return new Promise((resolve) => window.setTimeout(resolve, ms));
+}
+
 function HomeIndex({ items }) {
   if (!items.length) return null;
 
@@ -231,16 +235,8 @@ function App() {
   const [newPlayerName, setNewPlayerName] = useState('');
   const [newPlayerHandicap, setNewPlayerHandicap] = useState('');
   const [ruleRows, setRuleRows] = useState([]);
-  const [notice, setNotice] = useState({ text: '', error: false, visible: false });
 
   const isAdmin = route.mode === 'admin';
-
-  function showNotice(text, error = false) {
-    setNotice({ text, error, visible: true });
-    window.setTimeout(() => {
-      setNotice((prev) => ({ ...prev, visible: false }));
-    }, 2200);
-  }
 
   useEffect(() => {
     function onRouteChange() {
@@ -375,9 +371,8 @@ function App() {
         p_match_date: matchState.matchDate || null
       });
       updateTournament(payload, true);
-      showNotice('Partido guardado.');
     } catch (err) {
-      showNotice(err.message || 'No se pudo guardar el partido.', true);
+      window.alert(err.message || 'No se pudo guardar el partido.');
     }
   }
 
@@ -391,10 +386,8 @@ function App() {
       });
       updateTournament(payload, true);
       setPlayersMessage({ text: 'Jugador actualizado.', error: false });
-      showNotice('Jugador actualizado.');
     } catch (err) {
       setPlayersMessage({ text: err.message || 'No se pudo actualizar el jugador.', error: true });
-      showNotice(err.message || 'No se pudo actualizar el jugador.', true);
     }
   }
 
@@ -406,10 +399,8 @@ function App() {
       });
       updateTournament(payload, true);
       setPlayersMessage({ text: 'Jugador borrado.', error: false });
-      showNotice('Jugador borrado.');
     } catch (err) {
       setPlayersMessage({ text: err.message || 'No se pudo borrar el jugador.', error: true });
-      showNotice(err.message || 'No se pudo borrar el jugador.', true);
     }
   }
 
@@ -436,10 +427,8 @@ function App() {
       setNewPlayerName('');
       setNewPlayerHandicap('');
       setPlayersMessage({ text: 'Jugador añadido.', error: false });
-      showNotice('Jugador añadido.');
     } catch (err) {
       setPlayersMessage({ text: err.message || 'No se pudo añadir el jugador.', error: true });
-      showNotice(err.message || 'No se pudo añadir el jugador.', true);
     }
   }
 
@@ -457,10 +446,8 @@ function App() {
       });
       updateTournament(payload, true);
       setConfigMessage({ text: 'Cabecera guardada.', error: false });
-      showNotice('Cabecera guardada.');
     } catch (err) {
       setConfigMessage({ text: err.message || 'No se pudo guardar la cabecera.', error: true });
-      showNotice(err.message || 'No se pudo guardar la cabecera.', true);
     }
   }
 
@@ -480,10 +467,8 @@ function App() {
       });
       updateTournament(payload, true);
       setConfigMessage({ text: 'Reglas guardadas.', error: false });
-      showNotice('Reglas guardadas.');
     } catch (err) {
       setConfigMessage({ text: err.message || 'No se pudieron guardar las reglas.', error: true });
-      showNotice(err.message || 'No se pudieron guardar las reglas.', true);
     }
   }
 
@@ -597,12 +582,6 @@ function App() {
           <p className="mode-badge">{isAdmin ? 'Modo administrador' : 'Modo público (solo lectura)'}</p>
         )}
       </header>
-
-      {notice.visible && (
-        <div className={`notice-banner ${notice.error ? 'notice-error' : 'notice-ok'}`}>
-          {notice.text}
-        </div>
-      )}
 
       {route.mode === 'home' && (
         <section id="home-view" className="home-stack">
@@ -798,7 +777,7 @@ function App() {
               <input id="edit-subtitle-input" className="input" placeholder="Ej: Del 12 al 14 de abril · Club de Campo" value={configSubtitle} onChange={(e) => setConfigSubtitle(e.target.value)} />
 
               <div className="inline config-head-actions">
-                <button className="btn btn-primary" type="button" onClick={onSaveHeader}>Guardar cabecera</button>
+                <SaveActionButton text="Guardar cabecera" onAction={onSaveHeader} />
               </div>
 
               <hr className="section-divider" />
@@ -809,7 +788,7 @@ function App() {
               <RulesEditor rows={ruleRows} setRows={setRuleRows} />
 
               <div className="inline" style={{ marginTop: '8px' }}>
-                <button className="btn btn-primary" type="button" onClick={onSaveRules}>Guardar reglas</button>
+                <SaveActionButton text="Guardar reglas" onAction={onSaveRules} />
               </div>
 
               <div className="message" style={{ color: configMessage.error ? 'var(--danger)' : 'var(--brand-strong)' }}>{configMessage.text}</div>
@@ -857,7 +836,7 @@ function ResultRow({ match, initialState, isAdmin, p1Name, p2Name, onSave }) {
       <td>{match.points2 || 0}</td>
       {isAdmin && (
         <td>
-          <button className="btn btn-primary" type="button" onClick={() => onSave(match.id, state)}>Guardar</button>
+          <SaveActionButton text="Guardar" onAction={() => onSave(match.id, state)} />
         </td>
       )}
     </tr>
@@ -890,12 +869,43 @@ function PlayerRow({ player, isAdmin, onSave, onDelete }) {
       {isAdmin && (
         <td>
           <div className="inline">
-            <button className="btn btn-primary" type="button" onClick={() => onSave(player.id, state)}>Guardar</button>
+            <SaveActionButton text="Guardar" onAction={() => onSave(player.id, state)} />
             <button className="btn btn-danger" type="button" onClick={() => onDelete(player.id)}>Borrar</button>
           </div>
         </td>
       )}
     </tr>
+  );
+}
+
+function SaveActionButton({ text, onAction }) {
+  const [saving, setSaving] = useState(false);
+
+  async function handleClick() {
+    if (saving) return;
+    setSaving(true);
+    const started = Date.now();
+    try {
+      await onAction();
+    } finally {
+      const elapsed = Date.now() - started;
+      const remaining = Math.max(0, 400 - elapsed);
+      if (remaining > 0) await wait(remaining);
+      setSaving(false);
+    }
+  }
+
+  return (
+    <button
+      className={`btn btn-primary btn-save ${saving ? 'btn-saving' : ''}`}
+      type="button"
+      onClick={handleClick}
+      disabled={saving}
+      aria-busy={saving}
+      aria-live="polite"
+    >
+      {saving ? <span className="btn-spinner" aria-hidden="true" /> : text}
+    </button>
   );
 }
 

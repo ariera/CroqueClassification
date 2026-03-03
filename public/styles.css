@@ -223,6 +223,10 @@ h4 {
   transform: scale(0.98);
 }
 
+.btn:disabled {
+  cursor: not-allowed;
+}
+
 .btn-primary {
   background: var(--brand);
   color: #fff;
@@ -230,6 +234,31 @@ h4 {
 
 .btn-primary:hover {
   background: var(--brand-strong);
+}
+
+.btn-save {
+  min-width: 94px;
+}
+
+.btn-saving {
+  background: #0b5b56 !important;
+  opacity: 0.92;
+}
+
+.btn-spinner {
+  width: 15px;
+  height: 15px;
+  border-radius: 999px;
+  border: 2px solid rgba(255, 255, 255, 0.36);
+  border-top-color: #ffffff;
+  display: inline-block;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .btn-light {
@@ -338,29 +367,6 @@ td .input {
   color: var(--brand-strong);
 }
 
-.notice-banner {
-  position: sticky;
-  top: 8px;
-  z-index: 5;
-  margin: 0 0 10px;
-  padding: 10px 12px;
-  border-radius: 10px;
-  border: 1px solid transparent;
-  font-weight: 700;
-  font-size: 0.9rem;
-}
-
-.notice-ok {
-  background: #dff5ee;
-  color: #0b5b56;
-  border-color: #9fd7c8;
-}
-
-.notice-error {
-  background: #f9d9d5;
-  color: #b42318;
-  border-color: #f1b3ab;
-}
 
 .hidden {
   display: none !important;
@@ -444,8 +450,4 @@ td .input {
     width: 100%;
   }
 
-  .notice-banner {
-    font-size: 0.84rem;
-    padding: 9px 10px;
-  }
 }
