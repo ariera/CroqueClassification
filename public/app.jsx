@@ -30,12 +30,13 @@ function parseRoute() {
   const hashParts = hash.split('/').filter(Boolean);
   if (hashParts[0] === 't' && hashParts[1]) return { mode: 'public', id: hashParts[1] };
   if (hashParts[0] === 'a' && hashParts[1]) return { mode: 'admin', id: hashParts[1] };
+  if (hashParts[0] === 'nuevo') return { mode: 'create-championship', id: null };
 
   const parts = window.location.pathname.split('/').filter(Boolean);
   if (parts[0] === 't' && parts[1]) return { mode: 'public', id: parts[1] };
   if (parts[0] === 'a' && parts[1]) return { mode: 'admin', id: parts[1] };
 
-  return { mode: 'home', id: null };
+  return { mode: 'landing', id: null };
 }
 
 function readKnownTournaments() {
@@ -237,6 +238,7 @@ function App() {
   const [ruleRows, setRuleRows] = useState([]);
 
   const isAdmin = route.mode === 'admin';
+  const isTournamentRoute = route.mode === 'admin' || route.mode === 'public';
 
   useEffect(() => {
     function onRouteChange() {
@@ -252,7 +254,7 @@ function App() {
   }, []);
 
   useEffect(() => {
-    if (route.mode === 'home') {
+    if (!isTournamentRoute) {
       setError('');
       setLoading(false);
       setTournament(null);
@@ -294,7 +296,7 @@ function App() {
     return () => {
       cancelled = true;
     };
-  }, [route.mode, route.id]);
+  }, [route.mode, route.id, isTournamentRoute]);
 
   useEffect(() => {
     if (!tournament) return;
@@ -556,7 +558,7 @@ function App() {
   const publicUrl = tournament ? `${window.location.origin}${window.location.pathname}#/t/${tournament.publicId}` : '';
   const adminUrl = tournament && route.mode === 'admin' ? `${window.location.origin}${window.location.pathname}#/a/${route.id}` : '';
 
-  if (route.mode !== 'home' && loading) {
+  if (isTournamentRoute && loading) {
     return (
       <main className="shell">
         <section className="card"><p>Cargando torneo...</p></section>
@@ -578,20 +580,33 @@ function App() {
         <div>
           <h1><a id="brand-home-link" className="brand-link" href="#">Corquet League</a></h1>
         </div>
-        {route.mode !== 'home' && (
+        {isTournamentRoute && (
           <p className="mode-badge">{isAdmin ? 'Modo administrador' : 'Modo público (solo lectura)'}</p>
         )}
       </header>
 
-      {route.mode === 'home' && (
-        <section id="home-view" className="home-stack">
+      {route.mode === 'landing' && (
+        <section className="home-stack">
+          <section className="card landing-card">
+            <h2>Bienvenido a Corquet League</h2>
+            <p className="muted">
+              Una aplicación simple y directa para organizar tus campeonatos de croquet.
+            </p>
+            <button className="btn btn-primary" type="button" onClick={() => { window.location.hash = '#/nuevo'; }}>
+              Crear nuevo campeonato
+            </button>
+          </section>
           <HomeIndex items={knownTournaments} />
+        </section>
+      )}
 
+      {route.mode === 'create-championship' && (
+        <section id="home-view" className="home-stack">
           <section id="home-create-card" className="card">
-            <h2>Nuevo torneo</h2>
-            <p className="muted">Crea un torneo todos-contra-todos y comparte enlace público. Solo quien tenga enlace de admin puede editar.</p>
+            <h2>Nuevo campeonato</h2>
+            <p className="muted">Crea un campeonato todos-contra-todos y comparte enlace público. Solo quien tenga enlace de admin puede editar.</p>
 
-            <label className="label" htmlFor="tournament-title">Título del torneo</label>
+            <label className="label" htmlFor="tournament-title">Título del campeonato</label>
             <input id="tournament-title" className="input" placeholder="Ej: Liga de los domingos" value={homeTitle} onChange={(e) => setHomeTitle(e.target.value)} />
 
             <label className="label" htmlFor="tournament-subtitle">Subtítulo (opcional)</label>
@@ -618,7 +633,7 @@ function App() {
         </section>
       )}
 
-      {route.mode !== 'home' && tournament && (
+      {isTournamentRoute && tournament && (
         <section id="tournament-view">
           <div className="card tournament-head">
             <h2 id="tournament-title-view">{tournament.title}</h2>

@@ -102,6 +102,18 @@ h4 {
   gap: 14px;
 }
 
+.landing-card {
+  display: grid;
+  gap: 10px;
+  max-width: 720px;
+}
+
+.menu-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
 .share-actions {
   display: flex;
   flex-wrap: wrap;
@@ -447,6 +459,10 @@ td .input {
   }
 
   .home-index-row .btn {
+    width: 100%;
+  }
+
+  .menu-actions .btn {
     width: 100%;
   }
 
