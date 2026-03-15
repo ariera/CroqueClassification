@@ -115,6 +115,23 @@ function buildRuleMatrix(rows) {
   };
 }
 
+function rebuildRuleRows(levels, ruleMap) {
+  const orderedLevels = [...levels].sort((a, b) => a - b);
+  const nextRows = [];
+
+  orderedLevels.forEach((winner) => {
+    orderedLevels.forEach((loser) => {
+      nextRows.push({
+        winnerHandicap: String(winner),
+        loserHandicap: String(loser),
+        points: String(ruleMap.get(`${winner}|${loser}`) ?? '')
+      });
+    });
+  });
+
+  return nextRows;
+}
+
 function parseNullableInt(raw) {
   if (raw === '' || raw == null) return null;
   const n = Number(raw);
@@ -167,19 +184,7 @@ function RulesMatrix({ rows, editable, onChange }) {
   function updateCell(winnerHandicap, loserHandicap, value) {
     const nextMap = new Map(ruleMap);
     nextMap.set(`${winnerHandicap}|${loserHandicap}`, value);
-    const nextRows = [];
-
-    levels.forEach((winner) => {
-      levels.forEach((loser) => {
-        nextRows.push({
-          winnerHandicap: String(winner),
-          loserHandicap: String(loser),
-          points: String(nextMap.get(`${winner}|${loser}`) ?? '')
-        });
-      });
-    });
-
-    onChange(nextRows);
+    onChange(rebuildRuleRows(levels, nextMap));
   }
 
   return (
@@ -226,10 +231,20 @@ function RulesMatrix({ rows, editable, onChange }) {
 
 function ConfigRulesSection({ ruleRows, setRuleRows, configMessage, onSaveRules }) {
   const [editMode, setEditMode] = useState(false);
+  const [newLevel, setNewLevel] = useState('');
+  const { levels, ruleMap } = buildRuleMatrix(ruleRows);
 
   useEffect(() => {
     setEditMode(false);
   }, [ruleRows]);
+
+  function addHandicapLevel() {
+    const parsed = parseNullableInt(newLevel);
+    if (parsed == null) return;
+    if (levels.includes(parsed)) return;
+    setRuleRows(rebuildRuleRows([...levels, parsed], ruleMap));
+    setNewLevel('');
+  }
 
   return (
     <>
@@ -248,6 +263,21 @@ function ConfigRulesSection({ ruleRows, setRuleRows, configMessage, onSaveRules 
           {editMode && <SaveActionButton text="Guardar reglas" onAction={onSaveRules} />}
         </div>
       </div>
+      {editMode && (
+        <div className="rules-add-level">
+          <input
+            className="input"
+            type="number"
+            step="1"
+            placeholder="Añadir hándicap"
+            value={newLevel}
+            onChange={(e) => setNewLevel(e.target.value)}
+          />
+          <button className="btn btn-light" type="button" onClick={addHandicapLevel}>
+            Añadir fila/columna
+          </button>
+        </div>
+      )}
       <RulesMatrix rows={ruleRows} editable={editMode} onChange={setRuleRows} />
       <div className="message" style={{ color: configMessage.error ? 'var(--danger)' : 'var(--brand-strong)' }}>{configMessage.text}</div>
     </>
@@ -599,6 +629,7 @@ function App() {
 
   const publicUrl = tournament ? `${window.location.origin}${window.location.pathname}#/t/${tournament.publicId}` : '';
   const adminUrl = tournament && route.mode === 'admin' ? `${window.location.origin}${window.location.pathname}#/a/${route.id}` : '';
+  const homeUrl = `${window.location.origin}${window.location.pathname}`;
 
   if (isTournamentRoute && loading) {
     return (
@@ -815,8 +846,14 @@ function App() {
                 {isAdmin && <button className="btn btn-light" type="button" onClick={() => copyText(adminUrl)}>Copiar enlace admin</button>}
                 <button className="btn btn-primary" type="button" onClick={downloadTournamentExcel}>Descargar Excel</button>
               </div>
+              <hr className="section-divider" />
+              <p className="muted">Si quieres recomendar la app, comparte también la página principal.</p>
+              <div className="share-actions">
+                <button className="btn btn-light" type="button" onClick={() => copyText(homeUrl)}>Copiar enlace de la app</button>
+              </div>
               <details className="share-links">
                 <summary>Ver enlaces completos</summary>
+                <p className="muted small">Homepage: {homeUrl}</p>
                 <p className="muted small">Enlace público: {publicUrl}</p>
                 {isAdmin && <p className="muted small">Enlace admin: {adminUrl}</p>}
               </details>
