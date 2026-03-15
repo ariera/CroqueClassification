@@ -183,8 +183,7 @@ h4 {
   border-color: var(--brand);
 }
 
-.players-list,
-.rules-list {
+.players-list {
   display: grid;
   gap: 10px;
   margin-bottom: 14px;
@@ -195,23 +194,6 @@ h4 {
   display: grid;
   grid-template-columns: 1fr 120px auto;
   gap: 8px;
-}
-
-.rule-row {
-  grid-template-columns: 1fr 1fr 1fr auto;
-  align-items: end;
-}
-
-.rule-cell {
-  display: grid;
-  gap: 4px;
-}
-
-.rule-cell-label {
-  display: none;
-  color: var(--muted);
-  font-size: 0.78rem;
-  font-weight: 700;
 }
 
 .inline {
@@ -327,13 +309,96 @@ h4 {
   margin: 14px 0;
 }
 
-.rules-header {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr auto;
-  gap: 8px;
-  margin-bottom: 8px;
-  color: var(--muted);
-  font-size: 0.84rem;
+.rules-mode-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin: 8px 0 12px;
+  flex-wrap: wrap;
+}
+
+.rules-mode-bar p {
+  margin: 0;
+}
+
+.rules-matrix-wrap {
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface-strong);
+}
+
+.rules-matrix {
+  border-collapse: separate;
+  border-spacing: 0;
+  width: max-content;
+  min-width: 100%;
+}
+
+.rules-matrix th,
+.rules-matrix td {
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  padding: 0;
+  min-width: 58px;
+  text-align: center;
+  background: var(--surface);
+}
+
+.rules-matrix thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: #efe9da;
+  color: var(--text);
+  font-size: 0.82rem;
+  padding: 8px 6px;
+}
+
+.rules-matrix tbody th {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: #f3efe3;
+  color: var(--text);
+  font-size: 0.82rem;
+  padding: 8px 6px;
+}
+
+.rules-matrix .rules-corner {
+  left: 0;
+  z-index: 3;
+  min-width: 130px;
+}
+
+.rules-matrix td:last-child,
+.rules-matrix th:last-child {
+  border-right: 0;
+}
+
+.rules-matrix tr:last-child td,
+.rules-matrix tr:last-child th {
+  border-bottom: 0;
+}
+
+.rules-matrix-input {
+  min-width: 58px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  text-align: center;
+  padding: 10px 6px;
+}
+
+.rules-matrix-input:focus {
+  outline: 2px solid rgba(15, 118, 110, 0.25);
+  outline-offset: -2px;
+}
+
+.rules-matrix-value {
+  display: inline-block;
+  padding: 10px 6px;
   font-weight: 700;
 }
 
@@ -432,25 +497,20 @@ td .input {
     grid-template-columns: 1fr 1fr auto;
   }
 
-  .rules-header {
-    display: none;
+  .rules-mode-bar {
+    align-items: stretch;
   }
 
-  .rule-row {
-    grid-template-columns: 1fr;
-    gap: 8px;
-    border: 1px solid var(--line);
-    border-radius: 12px;
-    padding: 10px;
-    background: var(--surface-strong);
-  }
-
-  .rule-cell-label {
-    display: block;
-  }
-
-  .rule-row .btn-danger {
+  .rules-mode-bar .inline {
     width: 100%;
+  }
+
+  .rules-mode-bar .btn {
+    width: 100%;
+  }
+
+  .rules-matrix .rules-corner {
+    min-width: 110px;
   }
 
   .home-index-row {

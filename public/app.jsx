@@ -95,6 +95,26 @@ function rulesObjToRows(rulesObj) {
   });
 }
 
+function buildRuleMatrix(rows) {
+  const ruleMap = new Map(
+    rows.map((row) => [
+      `${row.winnerHandicap}|${row.loserHandicap}`,
+      row.points
+    ])
+  );
+
+  const levels = Array.from(
+    new Set(
+      rows.flatMap((row) => [Number(row.winnerHandicap), Number(row.loserHandicap)]).filter((value) => Number.isFinite(value))
+    )
+  ).sort((a, b) => a - b);
+
+  return {
+    levels,
+    ruleMap
+  };
+}
+
 function parseNullableInt(raw) {
   if (raw === '' || raw == null) return null;
   const n = Number(raw);
@@ -141,73 +161,95 @@ function HomeIndex({ items }) {
   );
 }
 
-function RulesEditor({ rows, setRows }) {
-  function updateRow(i, key, value) {
-    setRows((prev) => prev.map((row, idx) => (idx === i ? { ...row, [key]: value } : row)));
-  }
+function RulesMatrix({ rows, editable, onChange }) {
+  const { levels, ruleMap } = buildRuleMatrix(rows);
 
-  function addRow() {
-    setRows((prev) => [...prev, { winnerHandicap: '', loserHandicap: '', points: '' }]);
-  }
+  function updateCell(winnerHandicap, loserHandicap, value) {
+    const nextMap = new Map(ruleMap);
+    nextMap.set(`${winnerHandicap}|${loserHandicap}`, value);
+    const nextRows = [];
 
-  function removeRow(i) {
-    setRows((prev) => prev.filter((_r, idx) => idx !== i));
+    levels.forEach((winner) => {
+      levels.forEach((loser) => {
+        nextRows.push({
+          winnerHandicap: String(winner),
+          loserHandicap: String(loser),
+          points: String(nextMap.get(`${winner}|${loser}`) ?? '')
+        });
+      });
+    });
+
+    onChange(nextRows);
   }
 
   return (
+    <div className="rules-matrix-wrap">
+      <table className="rules-matrix">
+        <thead>
+          <tr>
+            <th className="rules-corner">Ganador \\ Perdedor</th>
+            {levels.map((level) => (
+              <th key={`col-${level}`}>{level}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {levels.map((winner) => (
+            <tr key={`row-${winner}`}>
+              <th>{winner}</th>
+              {levels.map((loser) => {
+                const key = `${winner}|${loser}`;
+                const value = ruleMap.get(key) ?? '';
+                return (
+                  <td key={key}>
+                    {editable ? (
+                      <input
+                        className="input rules-matrix-input"
+                        type="number"
+                        step="0.5"
+                        value={value}
+                        onChange={(e) => updateCell(winner, loser, e.target.value)}
+                      />
+                    ) : (
+                      <span className="rules-matrix-value">{value}</span>
+                    )}
+                  </td>
+                );
+              })}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function ConfigRulesSection({ ruleRows, setRuleRows, configMessage, onSaveRules }) {
+  const [editMode, setEditMode] = useState(false);
+
+  useEffect(() => {
+    setEditMode(false);
+  }, [ruleRows]);
+
+  return (
     <>
-      <div className="rules-header" aria-hidden="true">
-        <span>Hándicap ganador</span>
-        <span>Hándicap perdedor</span>
-        <span>Puntos</span>
-        <span>Acción</span>
+      <div className="rules-mode-bar">
+        <p className="muted small">
+          Vista por matriz: filas = hándicap del ganador, columnas = hándicap del perdedor.
+        </p>
+        <div className="inline">
+          <button
+            className={`btn ${editMode ? 'btn-danger' : 'btn-light'}`}
+            type="button"
+            onClick={() => setEditMode((prev) => !prev)}
+          >
+            {editMode ? 'Cancelar edición' : 'Editar reglas'}
+          </button>
+          {editMode && <SaveActionButton text="Guardar reglas" onAction={onSaveRules} />}
+        </div>
       </div>
-      <div className="rules-list">
-        {rows.map((row, i) => (
-          <div key={`${i}-${row.winnerHandicap}-${row.loserHandicap}-${row.points}`} className="rule-row">
-            <div className="rule-cell">
-              <span className="rule-cell-label">Hándicap ganador</span>
-              <input
-                className="input"
-                type="number"
-                placeholder="Hándicap ganador"
-                value={row.winnerHandicap}
-                onChange={(e) => updateRow(i, 'winnerHandicap', e.target.value)}
-              />
-            </div>
-            <div className="rule-cell">
-              <span className="rule-cell-label">Hándicap perdedor</span>
-              <input
-                className="input"
-                type="number"
-                placeholder="Hándicap perdedor"
-                value={row.loserHandicap}
-                onChange={(e) => updateRow(i, 'loserHandicap', e.target.value)}
-              />
-            </div>
-            <div className="rule-cell">
-              <span className="rule-cell-label">Puntos</span>
-              <input
-                className="input"
-                type="number"
-                step="0.5"
-                placeholder="Puntos"
-                value={row.points}
-                onChange={(e) => updateRow(i, 'points', e.target.value)}
-              />
-            </div>
-            <div className="rule-cell">
-              <span className="rule-cell-label">Acción</span>
-              <button className="btn btn-danger" type="button" onClick={() => removeRow(i)}>
-                Quitar
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
-      <button className="btn btn-light" type="button" onClick={addRow}>
-        Añadir regla
-      </button>
+      <RulesMatrix rows={ruleRows} editable={editMode} onChange={setRuleRows} />
+      <div className="message" style={{ color: configMessage.error ? 'var(--danger)' : 'var(--brand-strong)' }}>{configMessage.text}</div>
     </>
   );
 }
@@ -800,13 +842,12 @@ function App() {
               <h4>Reglas de puntos por hándicap</h4>
               <p className="muted small">Define puntos para el ganador según (hándicap ganador, hándicap rival). Si no existe una regla, se usa 1 punto por victoria.</p>
 
-              <RulesEditor rows={ruleRows} setRows={setRuleRows} />
-
-              <div className="inline" style={{ marginTop: '8px' }}>
-                <SaveActionButton text="Guardar reglas" onAction={onSaveRules} />
-              </div>
-
-              <div className="message" style={{ color: configMessage.error ? 'var(--danger)' : 'var(--brand-strong)' }}>{configMessage.text}</div>
+              <ConfigRulesSection
+                ruleRows={ruleRows}
+                setRuleRows={setRuleRows}
+                configMessage={configMessage}
+                onSaveRules={onSaveRules}
+              />
             </section>
           )}
         </section>
