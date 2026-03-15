@@ -554,6 +554,23 @@ function App() {
     }
   }
 
+  async function shareLink({ title, text, url }) {
+    if (!url) return;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({ title, text, url });
+        return;
+      } catch (err) {
+        if (err && err.name === 'AbortError') {
+          return;
+        }
+      }
+    }
+
+    await copyText(url);
+  }
+
   function downloadTournamentExcel() {
     if (!tournament) return;
     if (!window.XLSX) {
@@ -840,22 +857,55 @@ function App() {
           {activeTab === 'share' && (
             <section id="share-tab" className="card tab-panel">
               <h3>Compartir torneo</h3>
-              <p className="muted">Copia el enlace público para participantes y espectadores. El enlace admin permite editar.</p>
+              <p className="muted">Comparte el acceso adecuado según a quién quieras invitar al campeonato.</p>
               <div className="share-actions">
-                <button className="btn btn-light" type="button" onClick={() => copyText(publicUrl)}>Copiar enlace público</button>
-                {isAdmin && <button className="btn btn-light" type="button" onClick={() => copyText(adminUrl)}>Copiar enlace admin</button>}
+                <button
+                  className="btn btn-light"
+                  type="button"
+                  onClick={() => shareLink({
+                    title: tournament.title,
+                    text: `Te invito a seguir el campeonato ${tournament.title} en Corquet League.`,
+                    url: publicUrl
+                  })}
+                >
+                  Invitar espectadores al campeonato
+                </button>
+                {isAdmin && (
+                  <button
+                    className="btn btn-light"
+                    type="button"
+                    onClick={() => shareLink({
+                      title: `${tournament.title} · acceso administrador`,
+                      text: `Te invito como administrador al campeonato ${tournament.title} en Corquet League.`,
+                      url: adminUrl
+                    })}
+                  >
+                    Invitar administrador al campeonato
+                  </button>
+                )}
                 <button className="btn btn-primary" type="button" onClick={downloadTournamentExcel}>Descargar Excel</button>
               </div>
               <hr className="section-divider" />
-              <p className="muted">Si quieres recomendar la app, comparte también la página principal.</p>
+              <p className="muted">Si quieres recomendar la app, comparte Corquet League con otras personas.</p>
               <div className="share-actions">
-                <button className="btn btn-light" type="button" onClick={() => copyText(homeUrl)}>Copiar enlace de la app</button>
+                <button
+                  className="btn btn-light"
+                  type="button"
+                  onClick={() => shareLink({
+                    title: 'Corquet League',
+                    text: 'Prueba Corquet League para crear y compartir tus propios campeonatos de croquet.',
+                    url: homeUrl
+                  })}
+                >
+                  Compartir Corquet League
+                </button>
               </div>
+              <p className="muted small">No dará acceso a tus campeonatos. Sirve solo para que otras personas usen la app y creen los suyos.</p>
               <details className="share-links">
                 <summary>Ver enlaces completos</summary>
-                <p className="muted small">Homepage: {homeUrl}</p>
-                <p className="muted small">Enlace público: {publicUrl}</p>
-                {isAdmin && <p className="muted small">Enlace admin: {adminUrl}</p>}
+                <p className="muted small">Corquet League: {homeUrl}</p>
+                <p className="muted small">Invitación para espectadores: {publicUrl}</p>
+                {isAdmin && <p className="muted small">Invitación para administrador: {adminUrl}</p>}
               </details>
             </section>
           )}
