@@ -38,17 +38,11 @@ Si no se cumple, puntos del partido = 0 para ambos y no suma como jugado.
 
 ## Reglas de puntos por defecto
 
-- `6|6 -> 10`
-- `6|7 -> 9`
-- `6|8 -> 8`
-- `7|6 -> 11`
-- `7|7 -> 10`
-- `7|8 -> 9`
-- `8|6 -> 12`
-- `8|7 -> 11`
-- `8|8 -> 10`
+La app inicializa los campeonatos nuevos con la tabla canónica completa de compensación de puntos por hándicap del apéndice oficial compartido, cubriendo estos hándicaps:
 
-Si una combinación no existe, vale 1 punto por victoria.
+- `-6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14, 16, 18, 20`
+
+Cada combinación `hándicap ganador | hándicap perdedor` se precarga automáticamente en el campeonato nuevo.
 
 ## Arquitectura
 
