@@ -1,6 +1,54 @@
 const { useEffect, useMemo, useState } = React;
 
 const STORAGE_KEY = 'corquet_league_known_tournaments_v1';
+const CANONICAL_HANDICAP_LEVELS = [-6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14, 16, 18, 20];
+const CANONICAL_HANDICAP_POINTS = {
+  '-6': [10, 7, 4, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+  '-5': [13, 10, 7, 4, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+  '-4': [16, 13, 10, 7, 4, 3, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+  '-3': [18, 16, 13, 10, 7, 5, 3, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+  '-2': [19, 18, 16, 13, 10, 8, 6, 4, 3, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+  '-1': [19, 19, 17, 15, 12, 10, 8, 6, 4, 3, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+  '0': [19, 19, 18, 17, 14, 12, 10, 8, 6, 4, 3, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+  '1': [19, 19, 19, 18, 16, 14, 12, 10, 8, 6, 4, 3, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+  '2': [19, 19, 19, 19, 17, 16, 14, 12, 10, 8, 6, 4, 3, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1],
+  '3': [19, 19, 19, 19, 18, 17, 16, 14, 12, 10, 8, 6, 4, 3, 3, 2, 1, 1, 1, 1, 1, 1, 1],
+  '4': [19, 19, 19, 19, 19, 18, 17, 16, 14, 12, 10, 8, 6, 5, 4, 3, 2, 2, 1, 1, 1, 1, 1],
+  '5': [19, 19, 19, 19, 19, 19, 18, 17, 16, 14, 12, 10, 8, 7, 6, 5, 4, 3, 3, 2, 2, 1, 1],
+  '6': [19, 19, 19, 19, 19, 19, 19, 18, 17, 16, 14, 12, 10, 9, 8, 7, 6, 5, 4, 3, 3, 2, 2],
+  '7': [19, 19, 19, 19, 19, 19, 19, 18, 17, 16, 15, 13, 11, 10, 9, 8, 7, 6, 5, 4, 3, 3, 2],
+  '8': [19, 19, 19, 19, 19, 19, 19, 19, 18, 17, 16, 14, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 3],
+  '9': [19, 19, 19, 19, 19, 19, 19, 19, 18, 17, 15, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 4, 3],
+  '10': [19, 19, 19, 19, 19, 19, 19, 19, 19, 18, 17, 15, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 4],
+  '11': [19, 19, 19, 19, 19, 19, 19, 19, 19, 18, 17, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4],
+  '12': [19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6],
+  '14': [19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7],
+  '16': [19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8],
+  '18': [19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9],
+  '20': [19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10]
+};
+
+function buildCanonicalRuleRows() {
+  const rows = [];
+
+  CANONICAL_HANDICAP_LEVELS.forEach((winnerHandicap, rowIndex) => {
+    const rowPoints = CANONICAL_HANDICAP_POINTS[String(winnerHandicap)] || [];
+    CANONICAL_HANDICAP_LEVELS.forEach((loserHandicap, columnIndex) => {
+      rows.push({
+        winnerHandicap: String(winnerHandicap),
+        loserHandicap: String(loserHandicap),
+        points: String(rowPoints[columnIndex] ?? '')
+      });
+    });
+  });
+
+  return rows;
+}
+
+const CANONICAL_RULE_ROWS = buildCanonicalRuleRows();
+const CANONICAL_RULE_MAP = new Map(
+  CANONICAL_RULE_ROWS.map((row) => [`${row.winnerHandicap}|${row.loserHandicap}`, row.points])
+);
 
 function requireConfig() {
   const config = window.APP_CONFIG || {};
@@ -85,14 +133,20 @@ function rememberTournament(entry) {
 
 function rulesObjToRows(rulesObj) {
   const rules = rulesObj || {};
-  return Object.entries(rules).map(([key, points]) => {
+  const mergedMap = new Map(CANONICAL_RULE_MAP);
+  const extraLevels = new Set(CANONICAL_HANDICAP_LEVELS);
+
+  Object.entries(rules).forEach(([key, points]) => {
     const [winnerHandicap, loserHandicap] = key.split('|');
-    return {
-      winnerHandicap: String(winnerHandicap),
-      loserHandicap: String(loserHandicap),
-      points: String(points)
-    };
+    const winner = Number(winnerHandicap);
+    const loser = Number(loserHandicap);
+
+    mergedMap.set(`${winnerHandicap}|${loserHandicap}`, String(points));
+    if (Number.isFinite(winner)) extraLevels.add(winner);
+    if (Number.isFinite(loser)) extraLevels.add(loser);
   });
+
+  return rebuildRuleRows(Array.from(extraLevels), mergedMap);
 }
 
 function buildRuleMatrix(rows) {
@@ -308,6 +362,7 @@ function App() {
   const [newPlayerName, setNewPlayerName] = useState('');
   const [newPlayerHandicap, setNewPlayerHandicap] = useState('');
   const [ruleRows, setRuleRows] = useState([]);
+  const [shareSheet, setShareSheet] = useState(null);
 
   const isAdmin = route.mode === 'admin';
   const isTournamentRoute = route.mode === 'admin' || route.mode === 'public';
@@ -568,7 +623,11 @@ function App() {
       }
     }
 
-    await copyText(url);
+    setShareSheet({ title, text, url });
+  }
+
+  function openWindowShare(targetUrl) {
+    window.open(targetUrl, '_blank', 'noopener,noreferrer');
   }
 
   function downloadTournamentExcel() {
@@ -613,14 +672,11 @@ function App() {
       puntos: s.points
     }));
 
-    const rulesRows = Object.entries(tournament.scoringRules || {}).map(([key, points]) => {
-      const [winnerHandicap, loserHandicap] = key.split('|');
-      return {
-        handicap_ganador: Number(winnerHandicap),
-        handicap_perdedor: Number(loserHandicap),
-        puntos: points
-      };
-    });
+    const rulesRows = ruleRows.map((row) => ({
+      handicap_ganador: Number(row.winnerHandicap),
+      handicap_perdedor: Number(row.loserHandicap),
+      puntos: row.points === '' ? '' : Number(row.points)
+    })).filter((row) => Number.isFinite(row.handicap_ganador) && Number.isFinite(row.handicap_perdedor));
 
     const wb = window.XLSX.utils.book_new();
     window.XLSX.utils.book_append_sheet(wb, window.XLSX.utils.json_to_sheet(infoRows), 'campeonato');
@@ -647,6 +703,13 @@ function App() {
   const publicUrl = tournament ? `${window.location.origin}${window.location.pathname}#/t/${tournament.publicId}` : '';
   const adminUrl = tournament && route.mode === 'admin' ? `${window.location.origin}${window.location.pathname}#/a/${route.id}` : '';
   const homeUrl = `${window.location.origin}${window.location.pathname}`;
+  const shareMessage = shareSheet ? `${shareSheet.text} ${shareSheet.url}`.trim() : '';
+  const whatsappShareUrl = shareSheet
+    ? `https://wa.me/?text=${encodeURIComponent(shareMessage)}`
+    : '';
+  const mailtoShareUrl = shareSheet
+    ? `mailto:?subject=${encodeURIComponent(shareSheet.title || 'Corquet League')}&body=${encodeURIComponent(shareMessage)}`
+    : '';
 
   if (isTournamentRoute && loading) {
     return (
@@ -938,6 +1001,60 @@ function App() {
             </section>
           )}
         </section>
+      )}
+
+      {shareSheet && (
+        <div className="share-sheet-backdrop" role="presentation" onClick={() => setShareSheet(null)}>
+          <section
+            className="share-sheet"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="share-sheet-title"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="share-sheet-head">
+              <h3 id="share-sheet-title">Compartir</h3>
+              <button className="btn btn-light" type="button" onClick={() => setShareSheet(null)}>
+                Cerrar
+              </button>
+            </div>
+            <p className="muted small">{shareSheet.text}</p>
+            <div className="share-sheet-actions">
+              <button
+                className="btn btn-primary"
+                type="button"
+                onClick={async () => {
+                  await copyText(shareSheet.url);
+                  setShareSheet(null);
+                }}
+              >
+                Copiar enlace
+              </button>
+              <button
+                className="btn btn-light"
+                type="button"
+                onClick={() => openWindowShare(mailtoShareUrl)}
+              >
+                Compartir por email
+              </button>
+              <button
+                className="btn btn-light"
+                type="button"
+                onClick={() => openWindowShare(whatsappShareUrl)}
+              >
+                Compartir por WhatsApp
+              </button>
+              <button
+                className="btn btn-light"
+                type="button"
+                onClick={() => openWindowShare(shareSheet.url)}
+              >
+                Abrir enlace
+              </button>
+            </div>
+            <p className="muted small share-sheet-url">{shareSheet.url}</p>
+          </section>
+        </div>
       )}
     </main>
   );

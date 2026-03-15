@@ -25,6 +25,7 @@ Aplicación web para gestionar torneos de croquet formato round-robin (todos con
 - Borrado de jugadores sin resultados cargados (solo admin, con error amigable si no aplica)
 - Cálculo automático de puntos por hándicap
 - Enlace público (solo lectura) y enlace admin (edición)
+- Compartir desde móvil con menú nativo y desde desktop con panel propio (copiar, email, WhatsApp, abrir enlace)
 
 ## Regla de ganador
 
@@ -43,6 +44,8 @@ La app inicializa los campeonatos nuevos con la tabla canónica completa de comp
 - `-6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14, 16, 18, 20`
 
 Cada combinación `hándicap ganador | hándicap perdedor` se precarga automáticamente en el campeonato nuevo.
+
+Los campeonatos antiguos también pueden visualizar y editar la matriz canónica completa. Si les faltan reglas guardadas, los recálculos usan la tabla canónica como fallback.
 
 ## Arquitectura
 

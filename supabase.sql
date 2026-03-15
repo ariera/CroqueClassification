@@ -62,6 +62,52 @@ create index if not exists idx_matches_p1 on public.matches (p1_player_id);
 create index if not exists idx_matches_p2 on public.matches (p2_player_id);
 create index if not exists idx_scoring_rules_tournament on public.scoring_rules (tournament_id);
 
+create or replace function public.canonical_scoring_points(p_winner_handicap integer, p_loser_handicap integer)
+returns numeric
+language sql
+immutable
+as $$
+  with handicap_levels as (
+    select *
+    from unnest(array[-6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14, 16, 18, 20]) with ordinality
+      as h(handicap, idx)
+  ),
+  canonical_rows as (
+    select *
+    from (
+      values
+        (-6, array[10, 7, 4, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]::numeric[]),
+        (-5, array[13, 10, 7, 4, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]::numeric[]),
+        (-4, array[16, 13, 10, 7, 4, 3, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]::numeric[]),
+        (-3, array[18, 16, 13, 10, 7, 5, 3, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]::numeric[]),
+        (-2, array[19, 18, 16, 13, 10, 8, 6, 4, 3, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]::numeric[]),
+        (-1, array[19, 19, 17, 15, 12, 10, 8, 6, 4, 3, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]::numeric[]),
+        (0, array[19, 19, 18, 17, 14, 12, 10, 8, 6, 4, 3, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]::numeric[]),
+        (1, array[19, 19, 19, 18, 16, 14, 12, 10, 8, 6, 4, 3, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]::numeric[]),
+        (2, array[19, 19, 19, 19, 17, 16, 14, 12, 10, 8, 6, 4, 3, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1]::numeric[]),
+        (3, array[19, 19, 19, 19, 18, 17, 16, 14, 12, 10, 8, 6, 4, 3, 3, 2, 1, 1, 1, 1, 1, 1, 1]::numeric[]),
+        (4, array[19, 19, 19, 19, 19, 18, 17, 16, 14, 12, 10, 8, 6, 5, 4, 3, 2, 2, 1, 1, 1, 1, 1]::numeric[]),
+        (5, array[19, 19, 19, 19, 19, 19, 18, 17, 16, 14, 12, 10, 8, 7, 6, 5, 4, 3, 3, 2, 2, 1, 1]::numeric[]),
+        (6, array[19, 19, 19, 19, 19, 19, 19, 18, 17, 16, 14, 12, 10, 9, 8, 7, 6, 5, 4, 3, 3, 2, 2]::numeric[]),
+        (7, array[19, 19, 19, 19, 19, 19, 19, 18, 17, 16, 15, 13, 11, 10, 9, 8, 7, 6, 5, 4, 3, 3, 2]::numeric[]),
+        (8, array[19, 19, 19, 19, 19, 19, 19, 19, 18, 17, 16, 14, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 3]::numeric[]),
+        (9, array[19, 19, 19, 19, 19, 19, 19, 19, 18, 17, 15, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 4, 3]::numeric[]),
+        (10, array[19, 19, 19, 19, 19, 19, 19, 19, 19, 18, 17, 15, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 4]::numeric[]),
+        (11, array[19, 19, 19, 19, 19, 19, 19, 19, 19, 18, 17, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4]::numeric[]),
+        (12, array[19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6]::numeric[]),
+        (14, array[19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7]::numeric[]),
+        (16, array[19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8]::numeric[]),
+        (18, array[19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9]::numeric[]),
+        (20, array[19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10]::numeric[])
+    ) as r(winner_handicap, points_row)
+  )
+  select r.points_row[h.idx]
+  from canonical_rows r
+  join handicap_levels h
+    on h.handicap = p_loser_handicap
+  where r.winner_handicap = p_winner_handicap
+$$;
+
 create or replace function public.recalculate_tournament(p_tournament_id uuid)
 returns void
 language plpgsql
@@ -97,14 +143,14 @@ begin
         where sr.tournament_id = p_tournament_id
           and sr.winner_handicap = c.h1
           and sr.loser_handicap = c.h2
-      ), 1) as p1_win_points,
+      ), public.canonical_scoring_points(c.h1, c.h2), 1) as p1_win_points,
       coalesce((
         select sr.points
         from public.scoring_rules sr
         where sr.tournament_id = p_tournament_id
           and sr.winner_handicap = c.h2
           and sr.loser_handicap = c.h1
-      ), 1) as p2_win_points
+      ), public.canonical_scoring_points(c.h2, c.h1), 1) as p2_win_points
     from calc c
   )
   update public.matches m
